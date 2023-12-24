@@ -40,13 +40,13 @@
     Content-Type: raw (text)
     Example:
 
-         ```json
-         {
+    ```json
+    {
          "source_lang": "English",
          "target_lang": "French",
          "text": "This text will be translated to French"
-         }
-         ```
+    }
+    ```
 
     **_Response:_**
 
