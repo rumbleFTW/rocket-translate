@@ -1,37 +1,14 @@
 #[macro_use]
 extern crate rocket;
-use rocket::serde::{json::Json, Deserialize, Serialize};
+use rocket::serde::json::Json;
 
-#[derive(Deserialize)]
-#[serde(crate = "rocket::serde")]
-struct TranslateRequest<'r> {
-    source_lang: &'r str,
-    target_lang: &'r str,
-    text: &'r str,
-}
+mod globals;
+mod serializers;
+mod utils;
 
-#[derive(Serialize)]
-#[serde(crate = "rocket::serde")]
-struct RootResponse<'r> {
-    version: &'r str,
-    status: &'r str,
-}
-
-#[derive(Serialize)]
-#[serde(crate = "rocket::serde")]
-struct LanguageResponse<'r> {
-    languages: [&'r str; 10],
-}
-
-#[derive(Serialize)]
-#[serde(crate = "rocket::serde")]
-struct TranslateResponse<'r> {
-    success: bool,
-    source_language: &'r str,
-    target_language: &'r str,
-    original_text: &'r str,
-    translated_text: &'r str,
-}
+use globals::LANGS;
+use serializers::{LanguageResponse, RootResponse, TranslateRequest, TranslateResponse};
+use utils::translate_helper;
 
 #[get("/")]
 fn root() -> Json<RootResponse<'static>> {
@@ -44,22 +21,40 @@ fn root() -> Json<RootResponse<'static>> {
 
 #[get("/languages")]
 fn languages() -> Json<LanguageResponse<'static>> {
-    let response: LanguageResponse = LanguageResponse {
-        languages: ["fr", "en", "hi", "bn", "ka", "de", "af", "aa", "ab", "sq"],
-    };
+    let response: LanguageResponse = LanguageResponse { languages: LANGS };
     Json(response)
 }
 
 #[post("/translate", data = "<body>")]
-fn translate(body: Json<TranslateRequest>) -> Json<TranslateResponse> {
-    let response: TranslateResponse = TranslateResponse {
-        success: true,
-        source_language: body.source_lang,
-        target_language: body.target_lang,
-        original_text: body.text,
-        translated_text: "<placeholder>",
-    };
-    Json(response)
+async fn translate(body: Json<TranslateRequest<'_>>) -> Json<TranslateResponse<'_>> {
+    let res = translate_helper(
+        body.text.to_string(),
+        body.source_lang.to_string(),
+        body.target_lang.to_string(),
+    )
+    .await;
+    match res {
+        Ok(s) => {
+            let response: TranslateResponse = TranslateResponse {
+                success: true,
+                source_language: body.source_lang,
+                target_language: body.target_lang,
+                original_text: body.text,
+                translated_text: s,
+            };
+            return Json(response);
+        }
+        _ => {
+            let response: TranslateResponse = TranslateResponse {
+                success: false,
+                source_language: body.source_lang,
+                target_language: body.target_lang,
+                original_text: body.text,
+                translated_text: "Unexpected error".to_string(),
+            };
+            return Json(response);
+        }
+    }
 }
 
 #[launch]
