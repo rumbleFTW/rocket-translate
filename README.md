@@ -1,6 +1,6 @@
 # **Rocket translate**
 
-## Rocket-translate is a blazingly fast API for translation written in Rust rocket and rust-bert, It uses (T5)[https://huggingface.co/docs/transformers/model_doc/t5] checkpoints behind the stage, which can be replaced by any NLP pipeline supported by rust-bert.
+## Rocket-translate is a blazingly fast API for translation written in Rust rocket and rust-bert, It uses [T5](https://huggingface.co/docs/transformers/model_doc/t5) checkpoints behind the stage, which can be replaced by any NLP pipeline supported by rust-bert.
 
 ## API Documentation:
 
