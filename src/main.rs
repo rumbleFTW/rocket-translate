@@ -6,14 +6,14 @@ mod globals;
 mod serializers;
 mod utils;
 
-use globals::LANGS;
+use globals::{LANGS, VERSION};
 use serializers::{LanguageResponse, RootResponse, TranslateRequest, TranslateResponse};
 use utils::translate_helper;
 
 #[get("/")]
 fn root() -> Json<RootResponse<'static>> {
     let response: RootResponse = RootResponse {
-        version: "0.1.0",
+        version: VERSION,
         status: "Ok",
     };
     Json(response)
@@ -60,4 +60,28 @@ async fn translate(body: Json<TranslateRequest<'_>>) -> Json<TranslateResponse<'
 #[launch]
 fn rocket() -> _ {
     rocket::build().mount("/", routes![root, languages, translate])
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::rocket;
+    use rocket::http::Status;
+    use rocket::local::blocking::Client;
+
+    #[test]
+    fn test_root_endpoint() {
+        let client = Client::tracked(rocket()).expect("valid rocket instance");
+
+        let response = client.get("/").dispatch();
+        assert_eq!(response.status(), Status::Ok);
+    }
+
+    #[test]
+    fn test_languages_endpoint() {
+        let client = Client::tracked(rocket()).expect("valid rocket instance");
+
+        let response = client.get("/languages").dispatch();
+        assert_eq!(response.status(), Status::Ok);
+    }
 }

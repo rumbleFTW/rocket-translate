@@ -1,3 +1,5 @@
+pub const VERSION: &'static str = "0.1.0";
+
 pub const LANGS: [&'static str; 30] = [
     "English",
     "ChineseMandarin",

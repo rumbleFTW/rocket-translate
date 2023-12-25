@@ -131,3 +131,20 @@ pub async fn translate_helper(
     let Some(translated_text) = result.first() else {todo!()};
     return Ok(translated_text.to_string());
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_initialize() {
+        let result = initialize();
+        assert!(result.is_ok());
+    }
+    #[test]
+    fn test_get_language() {
+        let lang_str = "French".to_string();
+        let result = get_language(lang_str);
+        assert_eq!(result, Language::French);
+    }
+}
