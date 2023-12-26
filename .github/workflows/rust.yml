@@ -2,19 +2,33 @@ name: Rust
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   pull_request:
-    branches: [ "master" ]
+    branches: ["master"]
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Run tests
-      run: cargo test --verbose
+      - uses: actions/checkout@v3
+
+      - name: Install libtorch
+        run: |
+          # Add your libtorch installation commands here
+          # For example, you might download and extract the libtorch archive
+          wget https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-2.0.0%2Bcpu.zip
+          unzip libtorch-cxx11-abi-shared-with-deps-2.0.0+cpu.zip && rm libtorch-cxx11-abi-shared-with-deps-2.0.0+cpu.zip
+          export LIBTORCH=$(pwd)/libtorch
+          export LD_LIBRARY_PATH=$(pwd)/libtorch/lib:$LD_LIBRARY_PATH
+          echo $LIBTORCH
+          echo $LD_LIBRARY_PATH
+          ls .
+
+      - name: Build and test Rust project
+        run: |
+          cargo build --release
+          cargo test
